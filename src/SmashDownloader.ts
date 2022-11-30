@@ -4,6 +4,7 @@ import { Transfer as Transfer102019 } from '@smash-sdk/transfer/10-2019';
 import { Transfer as Transfer072022 } from '@smash-sdk/transfer/07-2022';
 import { DownloaderEvent } from "./globals/constant";
 import { getRegionFromId } from "@smash-sdk/core";
+import { DownloaderError } from "./errors/DownloaderError";
 
 export interface DownloaderParameters {
     token: string;
@@ -78,14 +79,18 @@ export class SmashDownloader extends CustomEventEmitter {
         return new Promise(async (resolve, reject) => {
             try {
                 const region = getRegionFromId(transferId);
-                if (fileId) {
-                    const transferSDK = new Transfer072022({ region, token: this.config.token });
-                    const { file } = await transferSDK.getTransferFilePreview({ transferId, fileId });
-                    resolve({ url: file.download, transferId, fileId, extension: file.ext, fileName: file.name });
+                if (region) {
+                    if (fileId) {
+                        const transferSDK = new Transfer072022({ region, token: this.config.token });
+                        const { file } = await transferSDK.getTransferFilePreview({ transferId, fileId });
+                        resolve({ url: file.download, transferId, fileId, extension: file.ext, fileName: file.name });
+                    } else {
+                        const transferSDK = new Transfer102019({ region, token: this.config.token });
+                        const { transfer } = await transferSDK.getTransferPreview({ transferId });
+                        resolve({ url: transfer.download, transferId, fileId, extension: ".zip", name: transfer.title });
+                    }
                 } else {
-                    const transferSDK = new Transfer102019({ region, token: this.config.token });
-                    const { transfer } = await transferSDK.getTransferPreview({ transferId });
-                    resolve({ url: transfer.download, transferId, fileId, extension: ".zip", name: transfer.title });
+                    throw new DownloaderError("Invalid transferId given: " + transferId);
                 }
             } catch (error) {
                 reject(error);
