@@ -12,9 +12,9 @@ export class Download extends CustomEventEmitter {
     public fileName?: string;
     public size = 0;
     public downloadedSize = 0;
-    private config: DownloaderParameters & { url: string };
+    private config: DownloaderParameters & { downloadUrl: string };
 
-    constructor(config: DownloaderParameters & { url: string }) {
+    constructor(config: DownloaderParameters & { downloadUrl: string }) {
         super();
         this.config = config;
     }
@@ -40,7 +40,7 @@ export class Download extends CustomEventEmitter {
         return new Promise(async (resolve, reject) => {
             try {
                 const transferSdk = new Transfer({});
-                const { stream, size, fileName } = await transferSdk.download({ url: this.config.url });
+                const { stream, size, fileName } = await transferSdk.download({ url: this.config.downloadUrl });
                 this.size = size;
                 this.fileName = fileName;
                 resolve(stream);
