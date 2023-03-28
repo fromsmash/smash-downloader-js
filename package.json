@@ -1,6 +1,6 @@
 {
   "name": "@smash-sdk/downloader",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "main": "./dist/SmashDownloader.js",
   "files": [
     "dist",
@@ -35,9 +35,9 @@
     "typescript": "^4.9.3"
   },
   "dependencies": {
-    "@smash-sdk/core": "^1.1.0",
+    "@smash-sdk/core": "^2.0.0",
     "@smash-sdk/link": "^0.0.1",
-    "@smash-sdk/transfer": "^0.0.8",
+    "@smash-sdk/transfer": "^0.0.9",
     "fs-extra": "^10.1.0"
   }
 }

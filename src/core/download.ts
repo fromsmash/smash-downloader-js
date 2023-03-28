@@ -7,6 +7,7 @@ export * from "../globals/constant";
 import { Transfer } from '@smash-sdk/transfer/10-2019';
 import { DownloaderParameters } from "../SmashDownloader";
 import path from "path";
+import { getRegionFromId } from "@smash-sdk/core/dist/helper/id";
 
 export class Download extends CustomEventEmitter {
     public fileName?: string;
@@ -39,7 +40,8 @@ export class Download extends CustomEventEmitter {
     private createReadStream(): Promise<NodeJS.ReadableStream> {
         return new Promise(async (resolve, reject) => {
             try {
-                const transferSdk = new Transfer({});
+                const region = getRegionFromId(this.config.transferId as string);
+                const transferSdk = new Transfer({ region, token: this.config.token });
                 const { stream, size, fileName } = await transferSdk.download({ url: this.config.downloadUrl });
                 this.size = size;
                 this.fileName = fileName;

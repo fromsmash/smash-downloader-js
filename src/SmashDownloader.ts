@@ -1,14 +1,12 @@
+import { getRegionFromId, Region } from "@smash-sdk/core";
+import { Link } from '@smash-sdk/link/10-2019';
+import { GetTransferFilePreviewInput, Transfer as Transfer072022 } from '@smash-sdk/transfer/07-2022';
+import { GetTransferPreviewInput, GetTransferPreviewOutput, Transfer as Transfer102019 } from '@smash-sdk/transfer/10-2019';
+import path from "path";
 import { CustomEventEmitter } from "./core/customEventEmitter";
 import { Download } from "./core/download";
-import { Transfer as Transfer102019, GetTransferPreviewOutput } from '@smash-sdk/transfer/10-2019';
-import { Link } from '@smash-sdk/link/10-2019';
-import { Transfer as Transfer072022 } from '@smash-sdk/transfer/07-2022';
-import { DownloaderEvent } from "./globals/constant";
-import { getRegionFromId, Region } from "@smash-sdk/core";
-import { DownloaderError } from "./errors/DownloaderError";
 import { InvalidParameterError } from "./errors/InvalidParameterError";
-import { fstat } from "fs";
-import path from "path";
+import { DownloaderEvent } from "./globals/constant";
 
 export interface DownloaderParameters {
     token: string;
@@ -18,6 +16,7 @@ export interface DownloaderParameters {
     fileId?: string;
     stream?: NodeJS.WritableStream;
     enableOverride?: boolean;
+    password?: string;
 }
 
 type TransferPropertiesOutput = GetTransferPreviewOutput['transfer'];
@@ -52,6 +51,7 @@ interface DownloadMetatadata extends TransferPropertiesOutput {
     name?: string,
 };
 
+
 export class SmashDownloader extends CustomEventEmitter {
     private config: DownloaderParameters;
 
@@ -75,7 +75,7 @@ export class SmashDownloader extends CustomEventEmitter {
     public download(): Promise<DownloaderOutput> {
         return new Promise(async (resolve, reject) => {
             try {
-                const meta = await this.getDownloadMetadata(this.config);
+                const meta = await this.getDownloadMetadata();
                 const downloadInstance = new Download({ downloadUrl: meta.downloadUrl, ...this.config });
                 downloadInstance.on(DownloaderEvent.Progress, (event) => {
                     this.emit(DownloaderEvent.Progress, event);
@@ -105,26 +105,34 @@ export class SmashDownloader extends CustomEventEmitter {
         })
     }
 
-    private getDownloadMetadata(config: DownloaderParameters): Promise<DownloadMetatadata> {
+    private getDownloadMetadata(): Promise<DownloadMetatadata> {
         return new Promise(async (resolve, reject) => {
             try {
-                if (config.url) {
+                if (this.config.url) {
                     const linkSDK = new Link({ token: this.config.token });
-                    const url = new URL(config.url);
+                    const url = new URL(this.config.url);
                     const { target } = await linkSDK.getTarget({ targetId: url.host + url.pathname });
-                    config.transferId = target.target;
+                    this.config.transferId = target.target;
                 }
-                const { transferId, fileId }: { transferId: string, fileId?: string } = config as { transferId: string, fileId?: string };
-                const region = getRegionFromId(config.transferId as string);
-                if (region) {
-                    const transferSDK = new Transfer102019({ region, token: this.config.token });
-                    const { transfer } = await transferSDK.getTransferPreview({ transferId });
-                    if (fileId) {
-                        const transferSDK = new Transfer072022({ region, token: this.config.token });
-                        const { file } = await transferSDK.getTransferFilePreview({ transferId, fileId });
-                        resolve({ ...transfer, downloadUrl: file.download, transferId, fileId, extension: file.ext, fileName: file.name });
+                const { transferId, fileId, token } = this.config;
+                const region = getRegionFromId(this.config.transferId as string);
+                if (region && this.config.transferId) {
+                    const transferSDK = new Transfer102019({ region, token });
+                    const getTransferPreviewParams: GetTransferPreviewInput = { transferId: this.config.transferId };
+                    if (this.config.password) {
+                        getTransferPreviewParams["smash-authorization"] = this.config.password;
+                    }
+                    const { transfer } = await transferSDK.getTransferPreview(getTransferPreviewParams);
+                    if (this.config.fileId) {
+                        const transferSDK = new Transfer072022({ region, token });
+                        const getTransferFilePreviewParams: GetTransferFilePreviewInput = { transferId: this.config.transferId, fileId: this.config.fileId };
+                        if (this.config.password) {
+                            getTransferFilePreviewParams["smash-authorization"] = this.config.password;
+                        }
+                        const { file } = await transferSDK.getTransferFilePreview(getTransferFilePreviewParams);
+                        resolve({ ...transfer, downloadUrl: file.download, transferId: this.config.transferId, fileId: this.config.fileId, extension: file.ext, fileName: file.name });
                     } else {
-                        resolve({ ...transfer, downloadUrl: transfer.download, transferId, fileId, name: transfer.title });
+                        resolve({ ...transfer, downloadUrl: transfer.download, transferId: this.config.transferId, fileId: this.config.fileId, name: transfer.title });
                     }
                 } else {
                     throw new InvalidParameterError("Invalid transferId given: " + transferId);
