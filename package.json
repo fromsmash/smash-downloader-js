@@ -1,6 +1,6 @@
 {
   "name": "@smash-sdk/downloader",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "./dist/SmashDownloader.js",
   "files": [
     "dist",
@@ -8,7 +8,31 @@
   ],
   "keywords": [
     "smash",
-    "downloader"
+    "sdk",
+    "fromsmash",
+    "node",
+    "nodejs",
+    "transfer",
+    "upload",
+    "uploader",
+    "file-upload",
+    "file-uploader",
+    "files",
+    "big-file",
+    "big-files",
+    "big file",
+    "big files",
+    "multipart",
+    "multipart-upload",
+    "multipart-uploader",
+    "library",
+    "typescript",
+    "progress",
+    "http",
+    "https",
+    "promise",
+    "async",
+    "await"
   ],
   "scripts": {
     "build": "tsc",
@@ -35,9 +59,9 @@
     "typescript": "^4.9.3"
   },
   "dependencies": {
-    "@smash-sdk/core": "^2.0.0",
-    "@smash-sdk/link": "^0.0.1",
-    "@smash-sdk/transfer": "^0.0.9",
+    "@smash-sdk/core": "^2.0.1",
+    "@smash-sdk/link": "^0.0.2",
+    "@smash-sdk/transfer": "^0.0.14",
     "fs-extra": "^10.1.0"
   }
 }
