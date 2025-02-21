@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://api.fromsmash.com/"><img src="https://developer.fromsmash.com/LOGO_SMASH_API.png" align="center" width="135" /></a> 
+  <a href="https://fromsmash.com/"><img src="https://developer.fromsmash.com/LOGO_SMASH_API.png" align="center" width="135" alt="Send big files"/></a>
   <h1 align="center">SmashDownloaderJS - Download library <br>powered by the Smash API & SDK</h1> 
 </p>
 <p align="center">

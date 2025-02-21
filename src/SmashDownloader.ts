@@ -120,14 +120,14 @@ export class SmashDownloader extends CustomEventEmitter {
                     const transferSDK = new Transfer102019({ region, token });
                     const getTransferPreviewParams: GetTransferPreviewInput = { transferId: this.config.transferId };
                     if (this.config.password) {
-                        getTransferPreviewParams["smash-authorization"] = this.config.password;
+                        getTransferPreviewParams["smash-authorization"] = encodeURIComponent(this.config.password);
                     }
                     const { transfer } = await transferSDK.getTransferPreview(getTransferPreviewParams);
                     if (this.config.fileId) {
                         const transferSDK = new Transfer072022({ region, token });
                         const getTransferFilePreviewParams: GetTransferFilePreviewInput = { transferId: this.config.transferId, fileId: this.config.fileId };
                         if (this.config.password) {
-                            getTransferFilePreviewParams["smash-authorization"] = this.config.password;
+                            getTransferFilePreviewParams["smash-authorization"] = encodeURIComponent(this.config.password);
                         }
                         const { file } = await transferSDK.getTransferFilePreview(getTransferFilePreviewParams);
                         resolve({ ...transfer, downloadUrl: file.download, transferId: this.config.transferId, fileId: this.config.fileId, extension: file.ext, fileName: file.name });
